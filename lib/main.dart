@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'presentation/pages/destinations_page.dart';
+
 void main() {
   runApp(const FamaApp());
 }
@@ -12,11 +14,7 @@ class FamaApp extends StatelessWidget {
     return MaterialApp(
       title: 'FAMA App',
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Center(
-          child: Text('FAMA App'),
-        ),
-      ),
+      home: const DestinationsPage(),
     );
   }
 }
