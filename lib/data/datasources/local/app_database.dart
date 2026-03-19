@@ -1,5 +1,5 @@
-import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
 class AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
@@ -37,5 +37,11 @@ class AppDatabase {
         ''');
       },
     );
+  }
+
+  Future<void> deleteDatabaseFile() async {
+    final path = join(await getDatabasesPath(), 'fama_app.db');
+    await deleteDatabase(path);
+    _database = null;
   }
 }

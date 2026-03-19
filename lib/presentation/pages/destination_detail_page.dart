@@ -22,14 +22,29 @@ class DestinationDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
+            SizedBox(
               width: double.infinity,
-              height: 220,
-              color: Colors.grey.shade300,
-              child: const Icon(
-                Icons.image,
-                size: 80,
-                color: Colors.grey,
+              height: 190,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                ),
+                child: Image.asset(
+                  destination.imageUrl,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.center,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.red.shade100,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'No se pudo cargar:\n${destination.imageUrl}',
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
             Padding(
@@ -39,68 +54,82 @@ class DestinationDetailPage extends StatelessWidget {
                 children: [
                   Text(
                     destination.name,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    destination.category,
-                    style: Theme.of(context).textTheme.titleMedium,
+                  const SizedBox(height: 12),
+                  Chip(
+                    label: Text(destination.category),
+                    avatar: const Icon(Icons.place, size: 18),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    destination.locationName,
-                    style: Theme.of(context).textTheme.bodyLarge,
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on_outlined, size: 20),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          destination.locationName,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   Text(
                     destination.description,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          height: 1.5,
+                        ),
                   ),
                   const SizedBox(height: 24),
                   Text(
                     'Ubicación',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                      height: 220,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: FlutterMap(
-                          options: MapOptions(
-                            initialCenter: LatLng(
-                              destination.latitude,
-                              destination.longitude,
-                            ),
-                            initialZoom: 13,
-                          ),
-                          children: [
-                            TileLayer(
-                              urlTemplate:
-                                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                              userAgentPackageName: 'com.example.fama_app',
-                            ),
-                            MarkerLayer(
-                              markers: [
-                                Marker(
-                                  point: LatLng(
-                                    destination.latitude,
-                                    destination.longitude,
-                                  ),
-                                  width: 40,
-                                  height: 40,
-                                  child: const Icon(
-                                    Icons.location_on,
-                                    size: 40,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
                         ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 220,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: FlutterMap(
+                        options: MapOptions(
+                          initialCenter: LatLng(
+                            destination.latitude,
+                            destination.longitude,
+                          ),
+                          initialZoom: 13,
+                        ),
+                        children: [
+                          TileLayer(
+                            urlTemplate:
+                                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                            userAgentPackageName: 'com.example.fama_app',
+                          ),
+                          MarkerLayer(
+                            markers: [
+                              Marker(
+                                point: LatLng(
+                                  destination.latitude,
+                                  destination.longitude,
+                                ),
+                                width: 40,
+                                height: 40,
+                                child: const Icon(
+                                  Icons.location_on,
+                                  size: 40,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
+                  ),
                 ],
               ),
             ),
