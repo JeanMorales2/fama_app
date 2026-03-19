@@ -1,17 +1,87 @@
-# fama_app
+# 🌍 FAMA App
 
-A new Flutter project.
+Aplicación móvil desarrollada en **Flutter** que permite visualizar destinos turísticos almacenados localmente, incluyendo listado, búsqueda, detalle y mapa interactivo.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🚀 Demo funcional
 
-A few resources to get you started if this is your first Flutter project:
+La aplicación permite:
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- 📍 Visualizar destinos turísticos
+- 🔎 Buscar destinos en tiempo real (offline)
+- 📄 Ver detalle completo del destino
+- 🗺️ Visualizar ubicación en mapa (OpenStreetMap)
+- 🖼️ Mostrar imágenes locales sin conexión
+- 💾 Persistir datos en SQLite
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## 🧱 Arquitectura
+
+Se utilizó una arquitectura por capas inspirada en **Clean Architecture**, separando responsabilidades para mejorar mantenibilidad y escalabilidad:
+
+lib/
+├── core/
+├── data/
+│   ├── datasources/
+│   │   └── local/
+│   ├── models/
+│   └── repositories/
+├── domain/
+│   ├── entities/
+│   ├── repositories/
+│   └── usecases/
+├── presentation/
+│   ├── pages/
+│   ├── widgets/
+│   └── store/
+
+---
+
+## ⚙️ Decisiones técnicas
+
+- Flutter para desarrollo multiplataforma
+- SQLite con sqflite + ffi para persistencia offline
+- flutter_map con OpenStreetMap (sin API key)
+- Assets locales para imágenes
+- Arquitectura desacoplada por capas
+
+---
+
+## 🔄 Flujo de datos
+
+UI → UseCase → Repository → DataSource → SQLite
+
+---
+
+## ▶️ Ejecución del proyecto
+
+flutter pub get
+flutter run
+
+---
+
+## 📦 Generar APK
+
+flutter build apk
+
+Ruta:
+build/app/outputs/flutter-apk/app-release.apk
+
+---
+
+## 🔮 Mejoras futuras
+
+- Manejo de estado con MobX o Riverpod
+- Inyección de dependencias
+- API remota
+- Filtros
+- Tests
+
+---
+
+## 👨‍💻 Autor
+
+Jean Carlos Eleazar Morales Gutiérrez
+Full Stack Developer
