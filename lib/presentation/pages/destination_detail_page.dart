@@ -47,6 +47,7 @@ class DestinationDetailPage extends StatelessWidget {
                 ),
               ),
             ),
+
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -58,11 +59,13 @@ class DestinationDetailPage extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                   ),
+
                   const SizedBox(height: 12),
                   Chip(
                     label: Text(destination.category),
                     avatar: const Icon(Icons.place, size: 18),
                   ),
+
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -76,6 +79,7 @@ class DestinationDetailPage extends StatelessWidget {
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 16),
                   Text(
                     destination.description,
@@ -83,6 +87,7 @@ class DestinationDetailPage extends StatelessWidget {
                           height: 1.5,
                         ),
                   ),
+
                   const SizedBox(height: 24),
                   Text(
                     'Ubicación',
@@ -90,45 +95,78 @@ class DestinationDetailPage extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                   ),
+
                   const SizedBox(height: 12),
                   SizedBox(
                     height: 220,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: FlutterMap(
-                        options: MapOptions(
-                          initialCenter: LatLng(
-                            destination.latitude,
-                            destination.longitude,
-                          ),
-                          initialZoom: 13,
-                        ),
+                      child: Stack(
                         children: [
-                          TileLayer(
-                            urlTemplate:
-                                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                            userAgentPackageName: 'com.example.fama_app',
-                          ),
-                          MarkerLayer(
-                            markers: [
-                              Marker(
-                                point: LatLng(
-                                  destination.latitude,
-                                  destination.longitude,
-                                ),
-                                width: 40,
-                                height: 40,
-                                child: const Icon(
-                                  Icons.location_on,
-                                  size: 40,
-                                  color: Colors.red,
-                                ),
+                          FlutterMap(
+                            options: MapOptions(
+                              initialCenter: LatLng(
+                                destination.latitude,
+                                destination.longitude,
+                              ),
+                              initialZoom: 13,
+                            ),
+                            children: [
+                              TileLayer(
+                                urlTemplate:
+                                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                userAgentPackageName:
+                                    'com.example.fama_app',
+                              ),
+                              MarkerLayer(
+                                markers: [
+                                  Marker(
+                                    point: LatLng(
+                                      destination.latitude,
+                                      destination.longitude,
+                                    ),
+                                    width: 40,
+                                    height: 40,
+                                    child: const Icon(
+                                      Icons.location_on,
+                                      size: 40,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
+                          ),
+                          Positioned(
+                            right: 12,
+                            bottom: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.6),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Text(
+                                'Mapa requiere internet',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
+                  ),
+
+                  const SizedBox(height: 8),
+                  Text(
+                    'El mapa utiliza OpenStreetMap y requiere conexión a internet.',
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
               ),
