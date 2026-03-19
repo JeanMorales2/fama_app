@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'destination_detail_page.dart';
 
 import '../../data/datasources/local/destination_local_datasource.dart';
 import '../../data/repositories/destination_repository_impl.dart';
@@ -90,7 +91,16 @@ class _DestinationsPageState extends State<DestinationsPage> {
             '${destination.category} • ${destination.locationName}',
           ),
           trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-          onTap: () {},
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => DestinationDetailPage(
+                  destination: destination,
+                ),
+              ),
+            );
+          },
         );
       },
     );
