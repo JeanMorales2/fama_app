@@ -1,15 +1,38 @@
+import 'package:sqflite/sqflite.dart';
+
 import '../../models/destination_model.dart';
+import 'app_database.dart';
 
 abstract class DestinationLocalDataSource {
   Future<List<DestinationModel>> getDestinations();
 }
 
 class DestinationLocalDataSourceImpl implements DestinationLocalDataSource {
+  final AppDatabase appDatabase;
+
+  DestinationLocalDataSourceImpl({required this.appDatabase});
+
   @override
   Future<List<DestinationModel>> getDestinations() async {
-    // Simulación de datos locales (luego reemplazar por SQLite)
-    return [
-      DestinationModel(
+    final db = await appDatabase.database;
+
+    final maps = await db.query('destinations');
+
+    if (maps.isEmpty) {
+      await _seedDestinations(db);
+      final seededMaps = await db.query('destinations');
+
+      return seededMaps
+          .map((map) => DestinationModel.fromJson(map))
+          .toList();
+    }
+
+    return maps.map((map) => DestinationModel.fromJson(map)).toList();
+  }
+
+  Future<void> _seedDestinations(Database db) async {
+    final destinations = [
+      const DestinationModel(
         id: 1,
         name: 'San Juan del Sur',
         description: 'Hermosa playa en Nicaragua',
@@ -19,7 +42,7 @@ class DestinationLocalDataSourceImpl implements DestinationLocalDataSource {
         latitude: 11.252,
         longitude: -85.870,
       ),
-      DestinationModel(
+      const DestinationModel(
         id: 2,
         name: 'Granada',
         description: 'Ciudad colonial histórica',
@@ -30,5 +53,13 @@ class DestinationLocalDataSourceImpl implements DestinationLocalDataSource {
         longitude: -85.956,
       ),
     ];
+
+    for (final destination in destinations) {
+      await db.insert(
+        'destinations',
+        destination.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
   }
 }

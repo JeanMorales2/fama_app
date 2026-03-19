@@ -5,6 +5,7 @@ import '../../data/datasources/local/destination_local_datasource.dart';
 import '../../data/repositories/destination_repository_impl.dart';
 import '../../domain/entities/destination.dart';
 import '../../domain/usecases/get_destinations.dart';
+import '../../data/datasources/local/app_database.dart';
 
 class DestinationsPage extends StatefulWidget {
   const DestinationsPage({super.key});
@@ -25,7 +26,9 @@ class _DestinationsPageState extends State<DestinationsPage> {
   void initState() {
     super.initState();
 
-    final localDataSource = DestinationLocalDataSourceImpl();
+    final localDataSource = DestinationLocalDataSourceImpl(
+  appDatabase: AppDatabase(),
+    );
     final repository = DestinationRepositoryImpl(
       localDataSource: localDataSource,
     );
