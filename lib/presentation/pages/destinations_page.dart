@@ -16,11 +16,17 @@ class DestinationsPage extends StatefulWidget {
 
 class _DestinationsPageState extends State<DestinationsPage> {
   late final GetDestinations _getDestinations;
+
   List<Destination> _destinations = [];
   List<Destination> _filteredDestinations = [];
+
   bool _isLoading = true;
   String? _errorMessage;
+
   final TextEditingController _searchController = TextEditingController();
+
+  int _visibleCount = 3;
+  final int _pageSize = 3;
 
   @override
   void initState() {
@@ -49,6 +55,7 @@ class _DestinationsPageState extends State<DestinationsPage> {
       setState(() {
         _destinations = result;
         _filteredDestinations = result;
+        _visibleCount = _pageSize;
         _isLoading = false;
       });
     } catch (e) {
@@ -65,14 +72,24 @@ class _DestinationsPageState extends State<DestinationsPage> {
     setState(() {
       if (normalizedQuery.isEmpty) {
         _filteredDestinations = _destinations;
-        return;
+      } else {
+        _filteredDestinations = _destinations.where((destination) {
+          return destination.name.toLowerCase().contains(normalizedQuery) ||
+              destination.category.toLowerCase().contains(normalizedQuery) ||
+              destination.locationName.toLowerCase().contains(normalizedQuery);
+        }).toList();
       }
 
-      _filteredDestinations = _destinations.where((destination) {
-        return destination.name.toLowerCase().contains(normalizedQuery) ||
-            destination.category.toLowerCase().contains(normalizedQuery) ||
-            destination.locationName.toLowerCase().contains(normalizedQuery);
-      }).toList();
+      _visibleCount = _pageSize;
+    });
+  }
+
+  void _loadMore() {
+    setState(() {
+      final nextCount = _visibleCount + _pageSize;
+      _visibleCount = nextCount > _filteredDestinations.length
+          ? _filteredDestinations.length
+          : nextCount;
     });
   }
 
@@ -125,6 +142,9 @@ class _DestinationsPageState extends State<DestinationsPage> {
       );
     }
 
+    final visibleDestinations =
+        _filteredDestinations.take(_visibleCount).toList();
+
     return Column(
       children: [
         Padding(
@@ -146,127 +166,147 @@ class _DestinationsPageState extends State<DestinationsPage> {
               ? const Center(
                   child: Text('No se encontraron destinos.'),
                 )
-              : ListView.builder(
-                  itemCount: _filteredDestinations.length,
-                  itemBuilder: (context, index) {
-                    final destination = _filteredDestinations[index];
-                    final categoryColor =
-                        _getCategoryColor(destination.category);
-                    final categoryIcon =
-                        _getCategoryIcon(destination.category);
+              : Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: visibleDestinations.length,
+                        itemBuilder: (context, index) {
+                          final destination = visibleDestinations[index];
+                          final categoryColor =
+                              _getCategoryColor(destination.category);
+                          final categoryIcon =
+                              _getCategoryIcon(destination.category);
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      child: Card(
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(14),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => DestinationDetailPage(
-                                  destination: destination,
-                                ),
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: Card(
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
                               ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.asset(
-                                    destination.imageUrl,
-                                    width: 72,
-                                    height: 72,
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (context, error, stackTrace) {
-                                      return Container(
-                                        width: 72,
-                                        height: 72,
-                                        color: Colors.grey.shade300,
-                                        child: const Icon(
-                                          Icons.image_not_supported,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(14),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => DestinationDetailPage(
+                                        destination: destination,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        destination.name,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
+                                      ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(10),
+                                        child: Image.asset(
+                                          destination.imageUrl,
+                                          width: 72,
+                                          height: 72,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return Container(
+                                              width: 72,
+                                              height: 72,
+                                              color: Colors.grey.shade300,
+                                              child: const Icon(
+                                                Icons.image_not_supported,
+                                              ),
+                                            );
+                                          },
                                         ),
                                       ),
-                                      const SizedBox(height: 6),
-                                      Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.location_on_outlined,
-                                            size: 16,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Expanded(
-                                            child: Text(
-                                              destination.locationName,
-                                              style: TextStyle(
-                                                color: Colors.grey.shade700,
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              destination.name,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                            const SizedBox(height: 6),
+                                            Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.location_on_outlined,
+                                                  size: 16,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Expanded(
+                                                  child: Text(
+                                                    destination.locationName,
+                                                    style: TextStyle(
+                                                      color:
+                                                          Colors.grey.shade700,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Chip(
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              label: Text(
+                                                destination.category,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                              avatar: Icon(
+                                                categoryIcon,
+                                                size: 16,
+                                                color: Colors.white,
+                                              ),
+                                              backgroundColor: categoryColor,
+                                              padding: EdgeInsets.zero,
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                      const SizedBox(height: 8),
-                                      Chip(
-                                        visualDensity:
-                                            VisualDensity.compact,
-                                        label: Text(
-                                          destination.category,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        avatar: Icon(
-                                          categoryIcon,
-                                          size: 16,
-                                          color: Colors.white,
-                                        ),
-                                        backgroundColor: categoryColor,
-                                        padding: EdgeInsets.zero,
+                                      const SizedBox(width: 8),
+                                      const Icon(
+                                        Icons.arrow_forward_ios,
+                                        size: 16,
                                       ),
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                const Icon(
-                                  Icons.arrow_forward_ios,
-                                  size: 16,
-                                ),
-                              ],
+                              ),
                             ),
+                          );
+                        },
+                      ),
+                    ),
+                    if (_visibleCount < _filteredDestinations.length)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _loadMore,
+                            child: const Text('Cargar más'),
                           ),
                         ),
                       ),
-                    );
-                  },
+                  ],
                 ),
         ),
       ],
