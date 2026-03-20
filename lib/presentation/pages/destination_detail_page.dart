@@ -42,9 +42,37 @@ class _DestinationDetailPageState extends State<DestinationDetailPage> {
     });
   }
 
+  Color _getCategoryColor(String category) {
+    switch (category.toLowerCase()) {
+      case 'playa':
+        return Colors.blue;
+      case 'cultural':
+        return Colors.deepPurple;
+      case 'naturaleza':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getCategoryIcon(String category) {
+    switch (category.toLowerCase()) {
+      case 'playa':
+        return Icons.beach_access;
+      case 'cultural':
+        return Icons.account_balance;
+      case 'naturaleza':
+        return Icons.park;
+      default:
+        return Icons.place;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final destination = widget.destination;
+    final categoryColor = _getCategoryColor(destination.category);
+    final categoryIcon = _getCategoryIcon(destination.category);
 
     return Scaffold(
       appBar: AppBar(
@@ -92,8 +120,16 @@ class _DestinationDetailPageState extends State<DestinationDetailPage> {
                   ),
                   const SizedBox(height: 12),
                   Chip(
-                    label: Text(destination.category),
-                    avatar: const Icon(Icons.place, size: 18),
+                    label: Text(
+                      destination.category,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    avatar: Icon(
+                      categoryIcon,
+                      size: 18,
+                      color: Colors.white,
+                    ),
+                    backgroundColor: categoryColor,
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -132,9 +168,16 @@ class _DestinationDetailPageState extends State<DestinationDetailPage> {
                   Text(
                     _hasInternet
                         ? 'Mapa interactivo cargado con conexión.'
-                        : 'Sin conexión: se muestra mapa local precargado.',
+                        : 'Sin conexión: se muestra una referencia local de la ubicación.',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
+                  if (!_hasInternet) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Podés acercar o mover la imagen del mapa.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
                   const SizedBox(height: 6),
                   Text(
                     'Latitud: ${destination.latitude} | Longitud: ${destination.longitude}',
@@ -205,38 +248,38 @@ class _DestinationDetailPageState extends State<DestinationDetailPage> {
   }
 
   Widget _buildOfflineMap(Destination destination) {
-  return SizedBox(
-    height: 220,
-    width: double.infinity,
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        color: Colors.grey.shade200,
-        child: InteractiveViewer(
-          minScale: 1,
-          maxScale: 4,
-          boundaryMargin: const EdgeInsets.all(20),
-          panEnabled: true,
-          scaleEnabled: true,
-          child: Center(
-            child: Image.asset(
-              destination.mapImageUrl,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: Colors.grey.shade200,
-                  alignment: Alignment.center,
-                  child: Text(
-                    'No se pudo cargar el mapa offline:\n${destination.mapImageUrl}',
-                    textAlign: TextAlign.center,
-                  ),
-                );
-              },
+    return SizedBox(
+      height: 220,
+      width: double.infinity,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          color: Colors.grey.shade200,
+          child: InteractiveViewer(
+            minScale: 1,
+            maxScale: 4,
+            boundaryMargin: const EdgeInsets.all(20),
+            panEnabled: true,
+            scaleEnabled: true,
+            child: Center(
+              child: Image.asset(
+                destination.mapImageUrl,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.grey.shade200,
+                    alignment: Alignment.center,
+                    child: Text(
+                      'No se pudo cargar el mapa offline:\n${destination.mapImageUrl}',
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
