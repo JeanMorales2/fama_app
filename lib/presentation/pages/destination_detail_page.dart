@@ -1,10 +1,11 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../domain/entities/destination.dart';
 
-class DestinationDetailPage extends StatelessWidget {
+class DestinationDetailPage extends StatefulWidget {
   final Destination destination;
 
   const DestinationDetailPage({
@@ -13,7 +14,38 @@ class DestinationDetailPage extends StatelessWidget {
   });
 
   @override
+  State<DestinationDetailPage> createState() => _DestinationDetailPageState();
+}
+
+class _DestinationDetailPageState extends State<DestinationDetailPage> {
+  bool _hasInternet = true;
+  bool _isCheckingConnection = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkConnection();
+  }
+
+  Future<void> _checkConnection() async {
+    final result = await Connectivity().checkConnectivity();
+
+    final hasConnection = result.any(
+      (connection) => connection != ConnectivityResult.none,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _hasInternet = hasConnection;
+      _isCheckingConnection = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final destination = widget.destination;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(destination.name),
@@ -47,7 +79,6 @@ class DestinationDetailPage extends StatelessWidget {
                 ),
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -59,13 +90,11 @@ class DestinationDetailPage extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                   ),
-
                   const SizedBox(height: 12),
                   Chip(
                     label: Text(destination.category),
                     avatar: const Icon(Icons.place, size: 18),
                   ),
-
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -79,7 +108,6 @@ class DestinationDetailPage extends StatelessWidget {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 16),
                   Text(
                     destination.description,
@@ -87,7 +115,6 @@ class DestinationDetailPage extends StatelessWidget {
                           height: 1.5,
                         ),
                   ),
-
                   const SizedBox(height: 24),
                   Text(
                     'Ubicación',
@@ -95,77 +122,22 @@ class DestinationDetailPage extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                   ),
-
                   const SizedBox(height: 12),
-                  SizedBox(
-                    height: 220,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Stack(
-                        children: [
-                          FlutterMap(
-                            options: MapOptions(
-                              initialCenter: LatLng(
-                                destination.latitude,
-                                destination.longitude,
-                              ),
-                              initialZoom: 13,
-                            ),
-                            children: [
-                              TileLayer(
-                                urlTemplate:
-                                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                userAgentPackageName:
-                                    'com.example.fama_app',
-                              ),
-                              MarkerLayer(
-                                markers: [
-                                  Marker(
-                                    point: LatLng(
-                                      destination.latitude,
-                                      destination.longitude,
-                                    ),
-                                    width: 40,
-                                    height: 40,
-                                    child: const Icon(
-                                      Icons.location_on,
-                                      size: 40,
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Positioned(
-                            right: 12,
-                            bottom: 12,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.6),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Text(
-                                'Mapa requiere internet',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
+                  _isCheckingConnection
+                      ? _buildLoadingMap()
+                      : _hasInternet
+                          ? _buildOnlineMap(destination)
+                          : _buildOfflineMap(destination),
                   const SizedBox(height: 8),
                   Text(
-                    'El mapa utiliza OpenStreetMap y requiere conexión a internet.',
+                    _hasInternet
+                        ? 'Mapa interactivo cargado con conexión.'
+                        : 'Sin conexión: se muestra mapa local precargado.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Latitud: ${destination.latitude} | Longitud: ${destination.longitude}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -176,4 +148,95 @@ class DestinationDetailPage extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildLoadingMap() {
+    return Container(
+      height: 220,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget _buildOnlineMap(Destination destination) {
+    return SizedBox(
+      height: 220,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: FlutterMap(
+          options: MapOptions(
+            initialCenter: LatLng(
+              destination.latitude,
+              destination.longitude,
+            ),
+            initialZoom: 13,
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'com.example.fama_app',
+            ),
+            MarkerLayer(
+              markers: [
+                Marker(
+                  point: LatLng(
+                    destination.latitude,
+                    destination.longitude,
+                  ),
+                  width: 40,
+                  height: 40,
+                  child: const Icon(
+                    Icons.location_on,
+                    size: 40,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOfflineMap(Destination destination) {
+  return SizedBox(
+    height: 220,
+    width: double.infinity,
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        color: Colors.grey.shade200,
+        child: InteractiveViewer(
+          minScale: 1,
+          maxScale: 4,
+          boundaryMargin: const EdgeInsets.all(20),
+          panEnabled: true,
+          scaleEnabled: true,
+          child: Center(
+            child: Image.asset(
+              destination.mapImageUrl,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.grey.shade200,
+                  alignment: Alignment.center,
+                  child: Text(
+                    'No se pudo cargar el mapa offline:\n${destination.mapImageUrl}',
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
 }

@@ -33,25 +33,27 @@ class DestinationLocalDataSourceImpl implements DestinationLocalDataSource {
   Future<void> _seedDestinations(Database db) async {
     final destinations = [
       const DestinationModel(
-        id: 1,
-        name: 'San Juan del Sur',
-        description: 'Hermosa playa en Nicaragua',
-        imageUrl: 'assets/images/san_juan_del_sur.jpg',
-        category: 'Playa',
-        locationName: 'Rivas, Nicaragua',
-        latitude: 11.252,
-        longitude: -85.870,
-      ),
-      const DestinationModel(
-        id: 2,
-        name: 'Granada',
-        description: 'Ciudad colonial histórica',
-        imageUrl: 'assets/images/granada.jpg',
-        category: 'Cultural',
-        locationName: 'Granada, Nicaragua',
-        latitude: 11.934,
-        longitude: -85.956,
-      ),
+                  id: 1,
+                  name: 'San Juan del Sur',
+                  description: 'Hermosa playa en Nicaragua',
+                  imageUrl: 'assets/images/san_juan_del_sur.jpg',
+                  mapImageUrl: 'assets/maps/san_juan_del_sur_map.png',
+                  category: 'Playa',
+                  locationName: 'Rivas, Nicaragua',
+                  latitude: 11.252,
+                  longitude: -85.870,
+                ),
+                const DestinationModel(
+                  id: 2,
+                  name: 'Granada',
+                  description: 'Ciudad colonial histórica',
+                  imageUrl: 'assets/images/granada.jpg',
+                  mapImageUrl: 'assets/maps/granada_map.png',
+                  category: 'Cultural',
+                  locationName: 'Granada, Nicaragua',
+                  latitude: 11.934,
+                  longitude: -85.956,
+                ),
     ];
 
     for (final destination in destinations) {

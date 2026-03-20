@@ -23,18 +23,19 @@ class AppDatabase {
       path,
       version: 1,
       onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE destinations (
-            id INTEGER PRIMARY KEY,
-            name TEXT,
-            description TEXT,
-            imageUrl TEXT,
-            category TEXT,
-            locationName TEXT,
-            latitude REAL,
-            longitude REAL
-          )
-        ''');
+          await db.execute('''
+            CREATE TABLE destinations (
+              id INTEGER PRIMARY KEY,
+              name TEXT,
+              description TEXT,
+              imageUrl TEXT,
+              mapImageUrl TEXT,
+              category TEXT,
+              locationName TEXT,
+              latitude REAL,
+              longitude REAL
+            )
+          ''');
       },
     );
   }

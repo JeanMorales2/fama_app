@@ -14,7 +14,7 @@ void main() async {
     databaseFactory = databaseFactoryFfi;
   }
 
-  // await AppDatabase().deleteDatabaseFile(); // solo una vez
+  //  await AppDatabase().deleteDatabaseFile(); 
 
   runApp(const FamaApp());
 }
