@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'destination_detail_page.dart';
 
+import '../../data/datasources/local/app_database.dart';
 import '../../data/datasources/local/destination_local_datasource.dart';
 import '../../data/repositories/destination_repository_impl.dart';
 import '../../domain/entities/destination.dart';
 import '../../domain/usecases/get_destinations.dart';
-import '../../data/datasources/local/app_database.dart';
 
 class DestinationsPage extends StatefulWidget {
   const DestinationsPage({super.key});
@@ -27,7 +27,7 @@ class _DestinationsPageState extends State<DestinationsPage> {
     super.initState();
 
     final localDataSource = DestinationLocalDataSourceImpl(
-  appDatabase: AppDatabase(),
+      appDatabase: AppDatabase(),
     );
     final repository = DestinationRepositoryImpl(
       localDataSource: localDataSource,
@@ -76,6 +76,32 @@ class _DestinationsPageState extends State<DestinationsPage> {
     });
   }
 
+  Color _getCategoryColor(String category) {
+    switch (category.toLowerCase()) {
+      case 'playa':
+        return Colors.blue;
+      case 'cultural':
+        return Colors.deepPurple;
+      case 'naturaleza':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getCategoryIcon(String category) {
+    switch (category.toLowerCase()) {
+      case 'playa':
+        return Icons.beach_access;
+      case 'cultural':
+        return Icons.account_balance;
+      case 'naturaleza':
+        return Icons.park;
+      default:
+        return Icons.place;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,32 +146,125 @@ class _DestinationsPageState extends State<DestinationsPage> {
               ? const Center(
                   child: Text('No se encontraron destinos.'),
                 )
-              : ListView.separated(
+              : ListView.builder(
                   itemCount: _filteredDestinations.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final destination = _filteredDestinations[index];
+                    final categoryColor =
+                        _getCategoryColor(destination.category);
+                    final categoryIcon =
+                        _getCategoryIcon(destination.category);
 
-                    return ListTile(
-                      leading: CircleAvatar(
-                        child: Text(destination.name.substring(0, 1)),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
                       ),
-                      title: Text(destination.name),
-                      subtitle: Text(
-                        '${destination.category} • ${destination.locationName}',
-                      ),
-                      trailing:
-                          const Icon(Icons.arrow_forward_ios, size: 16),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => DestinationDetailPage(
-                              destination: destination,
+                      child: Card(
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(14),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => DestinationDetailPage(
+                                  destination: destination,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.asset(
+                                    destination.imageUrl,
+                                    width: 72,
+                                    height: 72,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) {
+                                      return Container(
+                                        width: 72,
+                                        height: 72,
+                                        color: Colors.grey.shade300,
+                                        child: const Icon(
+                                          Icons.image_not_supported,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        destination.name,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.location_on_outlined,
+                                            size: 16,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: Text(
+                                              destination.locationName,
+                                              style: TextStyle(
+                                                color: Colors.grey.shade700,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Chip(
+                                        visualDensity:
+                                            VisualDensity.compact,
+                                        label: Text(
+                                          destination.category,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        avatar: Icon(
+                                          categoryIcon,
+                                          size: 16,
+                                          color: Colors.white,
+                                        ),
+                                        backgroundColor: categoryColor,
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Icon(
+                                  Icons.arrow_forward_ios,
+                                  size: 16,
+                                ),
+                              ],
                             ),
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     );
                   },
                 ),
